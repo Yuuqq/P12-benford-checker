@@ -305,3 +305,51 @@ details.teach-card[open] summary {
     .hero { background: var(--card, #fff); }
   }
 }
+
+/* =====================================================================
+ * v2.5 tool-specific — per-tool unique enhancements
+ * Archetypes: chart_svg, file_upload
+ * ===================================================================== */
+
+/* Chart/SVG visualization emphasis */
+svg { display: block; max-width: 100%; }
+svg text { font-family: ui-sans-serif, system-ui, "Noto Sans SC", sans-serif; }
+.chart, .chart-card, .chartWrap, [id="chart"], [id="scatterPlot"], [id="chartContainer"] {
+  border-radius: 12px;
+  background: var(--card, #fff);
+  position: relative;
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  svg [data-bar], svg .bar, svg path[data-segment], svg rect[data-bar] {
+    transition: opacity 0.15s ease;
+  }
+  svg [data-bar]:hover, svg .bar:hover { opacity: 0.85; }
+}
+
+/* File upload affordance */
+.dropzone, .drop-zone, .file-label, [id="dropzone"] {
+  border: 2px dashed var(--line, rgba(15,23,42,.18));
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+  background: rgba(255,255,255,0.4);
+}
+.dropzone:hover, .drop-zone:hover, .file-label:hover {
+  border-color: var(--accent, var(--focus, #2563eb));
+  background: rgba(37,99,235,0.04);
+  background: color-mix(in srgb, var(--accent, var(--focus, #2563eb)) 5%, transparent);
+}
+.dropzone.dragover, .drop-zone.dragover, .dropzone.drag-over, .drop-zone.drag-over {
+  border-color: var(--accent, var(--focus, #2563eb));
+  background: rgba(37,99,235,0.08);
+  background: color-mix(in srgb, var(--accent, var(--focus, #2563eb)) 10%, transparent);
+  transform: scale(1.005);
+}
+input[type="file"] { cursor: pointer; }
+
+/* P12 — Risk/deviation visualization */
+[id="risk"] { font-weight: 600; font-size: 1.05em; }
+[id="deviation"] { font-variant-numeric: tabular-nums; }
+
