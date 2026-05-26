@@ -1,10 +1,8 @@
 <!doctype html>
 <html lang="zh-CN">
-
 <head>
   <meta charset="utf-8" />
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>P12 本福特定律前端检测仪</title>
   <link rel="stylesheet" href="../shared/design-tokens.css" />
@@ -27,7 +25,7 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
 </head>
 
 <body>
-  <main class="app">
+  <main aria-label="主内容区域" class="app">
     <header class="hero">
       <h1>本福特定律前端检测仪</h1>
       <p>本福特定律(Benford's Law)指出，在自然产生的数据集中，首位数字为 1 的概率约为 30.1%，而非均匀分布的 11.1%。这被广泛用于财务审计与数据打假检测。</p>
@@ -60,11 +58,8 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
       </article>
     </section>
   </main>
-
-  <script src="../shared/vendor/papaparse.min.js"></script>
-  <script src="../shared/vendor/echarts.min.js"></script>
   <script src="./pm-metrics.js" defer></script>
-  <script src="./app.js" defer></script>
+<script src="./app.js" defer></script>
 
   <!-- Privacy Notice -->
   <div style="text-align:center;padding:12px 16px;font-size:12px;color:#888;border-top:1px solid #eee;margin-top:24px;">
@@ -72,21 +67,20 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
   </div>
 
   <!-- Cross-Project Navigation -->
-  <nav
-    style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:13px;border-top:1px solid #e5e5e5;margin-top:16px;color:#666;">
+  <nav aria-label="工具箱导航" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:13px;border-top:1px solid #e5e5e5;margin-top:16px;color:#666;">
     <a href="https://yuuqq.github.io/journalism-toolbox/" style="text-decoration:none;">📋 工具箱导航</a>
     <span style="opacity:.4">P12</span>
   </nav>
-  <script src="../shared/dark-toggle.js" defer></script>
-  <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
-  <script src="../shared/cmd-palette.js" defer></script>
-  <script src="../shared/toast.js" defer></script>
-  <script src="../shared/onboarding.js" defer></script>
 
-  <script src="../shared/pedagogy-data-p1.js" defer></script>
-  <script src="../shared/pedagogy-data-p2.js" defer></script>
-  <script src="../shared/global-nav.js" defer></script>
-  <script src="../shared/kbd-hints.js" defer></script>
+<script src="../shared/dark-toggle.js" defer></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
+<script src="../shared/cmd-palette.js" defer></script>
+<script src="../shared/toast.js" defer></script>
+<script src="../shared/onboarding.js" defer></script>
+<script src="../shared/pedagogy-data-p1.js" defer></script>
+<script src="../shared/pedagogy-data-p2.js" defer></script>
+<script src="../shared/global-nav.js" defer></script>
+<script src="../shared/kbd-hints.js" defer></script>
 </body>
 
 </html>
