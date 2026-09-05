@@ -3,6 +3,7 @@
   --card: #fff;
   --line: #d0d4ef;
   --ink: #1f2342;
+  --demo-accent: #f59e0b;
 }
 
 * { box-sizing: border-box; }
@@ -23,6 +24,16 @@ body {
 .note { color: #454f88; }
 
 .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* Demo data button — accent color via CSS variable (was inline #f59e0b) */
+.btn-demo {
+  background: var(--demo-accent);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 button {
   border: 0;
   border-radius: 999px;

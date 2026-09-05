@@ -38,8 +38,7 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
       <input id="fileInput" type="file" accept=".csv,text/csv" aria-label="选择文件" />
       <div style="display:flex;gap:12px;margin-top:8px">
         <button id="analyzeBtn" type="button">📊 开始分析</button>
-        <button id="demoBtn" type="button"
-          style="background:#f59e0b;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer">📋
+        <button id="demoBtn" type="button" class="btn-demo">📋
           加载示范数据</button>
       </div>
       <p id="status" aria-live="polite">状态: 等待文件</p>
@@ -59,6 +58,8 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
     </section>
   </main>
   <script src="./pm-metrics.js" defer></script>
+<script src="../shared/vendor/papaparse.min.js" defer></script>
+<script src="../shared/vendor/echarts.min.js" defer></script>
 <script src="./app.js" defer></script>
 
   <!-- Privacy Notice -->
