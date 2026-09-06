@@ -10,6 +10,7 @@
   <meta name="color-scheme" content="light dark">
   <title>P12 本福特定律前端检测仪</title>
   <link rel="stylesheet" href="../shared/design-tokens.css" />
+<link rel="stylesheet" href="https://yuuqq.github.io/shared/design-tokens.css" />
   <link rel="stylesheet" href="./styles.css" />
   <meta name="description" content="本福特定律前端检测仪。P12 本福特定律前端检测仪" />
   <meta property="og:title" content="P12 本福特定律检测仪" />
@@ -36,7 +37,7 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
       <p class="note">⚠️ 偏离是异常信号，不等于造假结论。没有 CSV？点击下方“加载示范数据”体验。</p>
     </header>
 
-    <section class="card"><details class="teach-card" open><summary>🎓 本福特定律与财务调查</summary><p>本福特定律是一个统计学现象：自然数据中首位数字为 1 的概率约 30%，而不是 11%。在调查报道中，它常用于检测财务造假、选举蹊弊和统计篇改：如果数据严重偏离本福特分布，可能被人为篡改过。</p></details></section>
+    <section class="card"><details class="teach-card"><summary>🎓 本福特定律与财务调查</summary><p>本福特定律是一个统计学现象：自然数据中首位数字为 1 的概率约 30%，而不是 11%。在调查报道中，它常用于检测财务造假、选举蹊弊和统计篇改：如果数据严重偏离本福特分布，可能被人为篡改过。</p></details></section>
 
     <section class="card controls">
       <input id="fileInput" type="file" accept=".csv,text/csv" aria-label="选择文件" />
@@ -63,8 +64,8 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
     </section>
   </main>
 
-  <script src="../shared/vendor/papaparse.min.js"></script>
-  <script src="../shared/vendor/echarts.min.js"></script>
+  <script src="../shared/vendor/papaparse.min.js" onerror="this.onerror=null;this.src='https://yuuqq.github.io/shared/vendor/papaparse.min.js'"></script>
+  <script src="../shared/vendor/echarts.min.js" onerror="this.onerror=null;this.src='https://yuuqq.github.io/shared/vendor/echarts.min.js'"></script>
   <script src="./pm-metrics.js" defer></script>
   <script src="./app.js" defer></script>
 
@@ -79,7 +80,21 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
     <a href="https://yuuqq.github.io/journalism-toolbox/" style="text-decoration:none;">📋 工具箱导航</a>
     <span style="opacity:.4">P12</span>
   </nav>
-  <script src="../shared/releases/v2.6/loader.js" data-modules="dark,cmd,toast,onboarding,pedagogy-p1,pedagogy-p2,nav,kbd"></script>
+  <script>
+(function () {
+  var modules = "dark,cmd,toast,onboarding,pedagogy-p1,pedagogy-p2,nav,kbd";
+  var s = document.createElement("script");
+  s.src = "../shared/releases/v2.6/loader.js";
+  s.setAttribute("data-modules", modules);
+  s.onerror = function () {
+    var t = document.createElement("script");
+    t.src = "https://yuuqq.github.io/shared/releases/v2.6/loader.js";
+    t.setAttribute("data-modules", modules);
+    document.body.appendChild(t);
+  };
+  document.body.appendChild(s);
+})();
+</script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
 
 </body>
