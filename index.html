@@ -39,14 +39,23 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
     <section class="card"><details class="teach-card" open><summary>🎓 本福特定律与财务调查</summary><p>本福特定律是一个统计学现象：自然数据中首位数字为 1 的概率约 30%，而不是 11%。在调查报道中，它常用于检测财务造假、选举蹊弊和统计篇改：如果数据严重偏离本福特分布，可能被人为篡改过。</p></details></section>
 
     <section class="card controls">
-      <input id="fileInput" type="file" accept=".csv,text/csv" aria-label="选择文件" />
-      <div style="display:flex;gap:12px;margin-top:8px">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+        <input id="fileInput" type="file" accept=".csv,text/csv" aria-label="选择文件" />
+        <select id="encodingSelect" aria-label="选择编码">
+          <option value="UTF-8">UTF-8</option>
+          <option value="GBK">GBK / GB18030</option>
+        </select>
+        <select id="columnSelect" aria-label="选择数据列">
+          <option value="">请先选择文件加载列名...</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:12px">
         <button id="analyzeBtn" type="button">📊 开始分析</button>
         <button id="demoBtn" type="button"
           style="background:#f59e0b;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer">📋
           加载示范数据</button>
       </div>
-      <p id="status" aria-live="polite">状态: 等待文件</p>
+      <p id="status" aria-live="polite" style="margin-top:12px">状态: 等待文件</p>
     </section>
 
     <section class="grid">
@@ -56,7 +65,8 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
       </article>
       <article class="card">
         <h2>偏离结果</h2>
-        <p id="deviation">偏离度: -</p>
+        <p id="sampleSize">样本量 (N): -</p>
+        <p id="deviation">卡方 (χ²): -</p>
         <p id="risk">提示: -</p>
         <ul id="details"></ul>
       </article>

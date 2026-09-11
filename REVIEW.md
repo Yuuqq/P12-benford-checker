@@ -7,55 +7,56 @@ This document contains a comprehensive code review of the `P12-benford-checker` 
 
 ## 2. HIGH
 
-### 2.1 Missing Shared Dependencies in Standalone Repo
-- **Location:** `index.html`, `app.js`, `sw.js`
-- **Impact:** The repository hardcodes relative paths to a `../shared/` directory (e.g., `../shared/design-tokens.css`, `../shared/vendor/papaparse.min.js`, `../shared/releases/v2.6/loader.js`). If a developer clones only this repository to run it locally, the application will break due to 404 errors for core libraries (PapaParse, ECharts) and styles.
-- **Fix Suggestion:** Document the monorepo/workspace structure in `README.md` so developers know they must clone the parent workspace or a specific shared repository. Alternatively, use a package manager (npm) to manage dependencies, or use CDN links with a fallback to local files.
+### 2.1 SPEC Regression: Missing Chi-Square Test & Small Sample Size Risk
+- **Location:** `app.js` (Statistical logic and Demo Data)
+- **Impact:** The current implementation uses an arbitrary L1 deviation threshold (0.15/0.25) which is not statistically sound for Benford's law. A Chi-square (χ²) test is the standard requirement. Furthermore, the UI lacks display of the χ² statistic, p-value (or significance level), and sample size (N). The built-in demo data only has ~50 rows, which is too small for reliable Benford analysis and presents an ethical risk of misleading investigative journalists into drawing conclusions from insufficient data.
+- **Fix Suggestion:** Implement the Chi-square goodness-of-fit test. Display χ², degrees of freedom, and sample size N. Enforce or clearly warn if N < 100. Update the demo data to include at least 150-200 rows. Replace subjective "risk" language with objective statistical conclusions.
 
-### 2.2 Lack of Automated Testing
-- **Location:** Repository-wide
-- **Impact:** While `QA.md` indicates manual testing was performed, there are no automated tests (unit or E2E). Regressions in the mathematical logic (e.g., `leadingDigit`, `benfordExpected`) or UI flows will go undetected until manual QA is performed again.
-- **Fix Suggestion:** Introduce a minimal test suite. Add unit tests for core mathematical and parsing functions using Node's native test runner, Jest, or Vitest. Add Playwright or Cypress for E2E testing of the CSV upload and chart rendering flows.
+### 2.2 GBK/GB18030 Encoding Support Missing
+- **Location:** `app.js` (`parseCsv` function)
+- **Impact:** PapaParse defaults to UTF-8. Domestic (Chinese) CSVs often use GBK or GB18030 encoding (e.g., exported from local software or Excel). Without specifying the encoding, domestic users will see garbled text in headers and string columns, potentially breaking column inference and analysis.
+- **Fix Suggestion:** Add an encoding selection dropdown (UTF-8 / GBK) to the UI and pass the selected encoding to PapaParse.
+
+### 2.3 Main Thread Blocking for Large CSV Files
+- **Location:** `app.js` (`parseCsv` function and `analyzeBtn.addEventListener`)
+- **Impact:** PapaParse is configured to parse the entire file into memory at once. For large CSV files (e.g., >50MB with millions of rows), this will freeze the browser tab and trigger a "page unresponsive" warning.
+- **Fix Suggestion:** Use PapaParse's `worker: true` option to parse in a background thread, and use the `step` or `chunk` callbacks to stream the data and update counts incrementally.
+
+### 2.4 Flawed Numeric Column Inference
+- **Location:** `app.js` (`inferNumericColumn` function)
+- **Impact:** `inferNumericColumn` automatically selects the *first* column containing at least one finite number. In many datasets, the first numeric column is an ID (e.g., `1, 2, 3`), a year, or a zip code. Analyzing these for Benford's Law is statistically meaningless.
+- **Fix Suggestion:** Parse the headers first, present a `<select>` dropdown UI to let the user choose the column they want to analyze.
+
+### 2.5 Numeric Parsing Fails on Commas and Formats
+- **Location:** `app.js` (`leadingDigit` function)
+- **Impact:** `Number(value)` evaluates to `NaN` if the CSV contains formatted numbers with thousand separators (e.g., `"1,000"`), currency symbols, or full-width commas. The script skips these valid numbers. Simple string replacement might break European formatting (e.g., `1.234,56`).
+- **Fix Suggestion:** Improve numeric string parsing to strip currency symbols, spaces, and correctly extract the leading non-zero digit regardless of European or US formatting.
 
 ## 3. MEDIUM
 
-### 3.1 Main Thread Blocking for Large CSV Files
-- **Location:** `app.js` (`parseCsv` function and `analyzeBtn.addEventListener`)
-- **Impact:** PapaParse is configured to parse the entire file into memory at once (`complete: r => resolve(r)`). Furthermore, the iteration over `rows` to compute the leading digits happens synchronously on the main thread. For large CSV files (e.g., >50MB with millions of rows), this will freeze the browser tab and trigger a "page unresponsive" warning.
-- **Fix Suggestion:** Use PapaParse's `worker: true` option to parse in a background thread, and use the `step` or `chunk` callbacks to stream the data and update the counts incrementally rather than loading everything into an array at once.
-
-### 3.2 Flawed Numeric Column Inference
-- **Location:** `app.js` (Lines 63-65, `inferNumericColumn` function)
-- **Impact:** `inferNumericColumn` automatically selects the *first* column containing at least one finite number. In many datasets, the first numeric column is an ID (e.g., `1, 2, 3`), a year, or a zip code. Analyzing these for Benford's Law is statistically meaningless and will confuse users.
-- **Fix Suggestion:** Instead of silently guessing and locking in the column, parse the headers, present a `<select>` dropdown UI to let the user choose the column they want to analyze, and default the dropdown to the first inferred numeric column as merely a suggestion.
-
-### 3.3 Numeric Parsing Fails on Commas (e.g., "1,234.56")
-- **Location:** `app.js` (Lines 40-46, `leadingDigit` function)
-- **Impact:** `Number(value)` will evaluate to `NaN` if the CSV contains formatted numbers with thousand separators (e.g., `"1,000"`). The script will skip these valid numbers, potentially skewing the Benford analysis or failing completely due to "insufficient numbers".
-- **Fix Suggestion:** Strip commas and other common formatting characters before casting to a Number.
-  ```javascript
-  const cleanStr = String(value).replace(/,/g, '');
-  const n = Math.abs(Number(cleanStr));
-  ```
-
-### 3.4 Missing Content Security Policy (CSP)
+### 3.1 Missing Content Security Policy (CSP)
 - **Location:** `index.html`
-- **Impact:** Although XSS vectors are mitigated by the use of `.textContent` when writing to the DOM, the application lacks a Content Security Policy. A strict CSP provides defense-in-depth against malicious scripts, which is particularly important for tools handling untrusted user-uploaded files.
-- **Fix Suggestion:** Add a `<meta http-equiv="Content-Security-Policy" content="...">` tag to `index.html` restricting scripts, styles, and workers to `self` or trusted CDNs.
+- **Impact:** Although XSS vectors are mitigated by the use of `.textContent`, the application lacks a Content Security Policy. A naive CSP might block the shared `loader.js` scripts, so care must be taken to allow the pedagogical modules while restricting unknown scripts.
+- **Fix Suggestion:** Add a tailored `<meta http-equiv="Content-Security-Policy">` tag.
+
+### 3.2 Service Worker Cache Resiliency
+- **Location:** `sw.js` (Install event listener)
+- **Impact:** The Service Worker uses `Promise.allSettled` to silently skip missing files during `cache.addAll`. If critical files fail to fetch (like `app.js`), they will be skipped, leaving the user with an incomplete offline experience.
+- **Fix Suggestion:** Separate critical and non-critical assets. Use strict `cache.addAll` for critical assets.
 
 ## 4. LOW
 
-### 4.1 Global Namespace Pollution
-- **Location:** `app.js` (Lines 1-8)
-- **Impact:** Variables like `fileInput`, `chart`, `analyzeBtn` are declared in the global scope. This could lead to conflicts if other injected scripts (like the shared loader modules) use the same variable names.
-- **Fix Suggestion:** Wrap the entire application logic in an IIFE (Immediately Invoked Function Expression), an event listener for `DOMContentLoaded`, or use ES Modules by adding `type="module"` to the script tag.
+### 4.1 Missing Shared Dependencies in Standalone Repo
+- **Location:** `index.html`, `app.js`, `sw.js`
+- **Impact:** The repository hardcodes relative paths to a `../shared/` directory. While this works on production Pages via a fallback (implemented in PR #1), local clones will encounter 404s.
+- **Fix Suggestion:** Document the monorepo/workspace structure in `README.md`.
 
-### 4.2 Repeated and Monolithic CSS Overrides
-- **Location:** `styles.css`
-- **Impact:** The CSS file contains multiple "upgrade batches" appended over time (e.g., `CSS Professor Upgrade (Round 20)`, `CSS Professor Animation Upgrade (Round 22)`). Some rules are overridden multiple times or have redundant fallbacks, increasing file size and making maintenance harder.
-- **Fix Suggestion:** Refactor and consolidate the CSS. Remove redundant blocks and establish a cleaner baseline without relying on appended patch blocks.
+### 4.2 Lack of Automated Testing
+- **Location:** Repository-wide
+- **Impact:** No automated tests (unit or E2E). Regressions in the mathematical logic will go undetected.
+- **Fix Suggestion:** Introduce a minimal test suite (e.g., Jest or Vitest) for core math functions.
 
-### 4.3 Service Worker Cache Resiliency
-- **Location:** `sw.js` (Install event listener)
-- **Impact:** The Service Worker uses `Promise.allSettled` to silently skip missing optional files during `cache.addAll`. However, if critical files fail to fetch (like `app.js`), they will just be skipped rather than failing the installation, leaving the user with an incomplete offline experience.
-- **Fix Suggestion:** Separate `CORE_ASSETS` into critical and non-critical arrays. Use strict `cache.addAll` for critical assets (HTML, JS, CSS) to ensure the app only installs if it can run offline, and `allSettled` only for optional assets (fonts, icons).
+### 4.3 Global Namespace Pollution & CSS Overrides
+- **Location:** `app.js` and `styles.css`
+- **Impact:** Variables are declared in the global scope. The CSS file contains multiple redundant "upgrade batches".
+- **Fix Suggestion:** Wrap the application logic in an IIFE. Refactor and consolidate the CSS.
