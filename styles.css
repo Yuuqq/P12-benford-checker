@@ -93,7 +93,7 @@ a { transition: color 0.15s ease; }
   .app, main, .container { padding: 12px; }
   h1 { font-size: 1.5rem; }
   h2 { font-size: 1.2rem; }
-  button, .btn { width: 100%; }
+  button, .btn { width: auto; max-width: 100%; }
 }
 
 /* === Dark Mode Override (auto-generated) === */
