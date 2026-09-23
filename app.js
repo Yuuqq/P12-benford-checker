@@ -38,8 +38,19 @@ function benfordExpected() {
   return arr;
 }
 
+function toNumber(value) {
+  if (value == null) return null;
+  let text = String(value).trim();
+  if (!text) return null;
+  text = text.replace(/[０-９]/g, (ch) => String.fromCharCode(ch.charCodeAt(0) - 0xfee0));
+  text = text.replace(/[，,\s]/g, "").replace(/．/g, ".");
+  if (!/^-?\d+(\.\d+)?$/.test(text)) return null;
+  const n = Number(text);
+  return Number.isFinite(n) ? n : null;
+}
+
 function leadingDigit(value) {
-  const n = Math.abs(Number(value));
+  const n = Math.abs(toNumber(value) ?? NaN);
   if (!Number.isFinite(n) || n === 0) return null;
   const str = n.toString().replace(/^0+/, "");
   const m = str.match(/[1-9]/);
@@ -62,7 +73,18 @@ function parseCsv(file) {
 }
 
 function inferNumericColumn(rows, headers) {
-  return headers.find(h => rows.some(r => Number.isFinite(Number(r[h]))));
+  let best = null;
+  let bestRatio = 0;
+  headers.forEach((header) => {
+    const cells = rows.map((row) => row[header]).filter((value) => String(value ?? "").trim() !== "");
+    if (!cells.length) return;
+    const ratio = cells.filter((value) => toNumber(value) !== null).length / cells.length;
+    if (ratio >= 0.6 && ratio > bestRatio) {
+      best = header;
+      bestRatio = ratio;
+    }
+  });
+  return best;
 }
 
 analyzeBtn.addEventListener("click", async () => {
@@ -83,13 +105,21 @@ analyzeBtn.addEventListener("click", async () => {
     }
 
     const counts = Array(9).fill(0);
+    const magnitudes = [];
     let total = 0;
+    let skipped = 0;
     rows.forEach(r => {
-      const d = leadingDigit(r[col]);
-      if (d) {
-        counts[d - 1] += 1;
-        total += 1;
+      const raw = r[col];
+      if (String(raw ?? "").trim() === "") return;
+      const numeric = toNumber(raw);
+      const d = leadingDigit(raw);
+      if (!d || numeric === null) {
+        skipped += 1;
+        return;
       }
+      counts[d - 1] += 1;
+      total += 1;
+      if (numeric !== 0) magnitudes.push(Math.abs(numeric));
     });
 
     if (!total) {
@@ -100,6 +130,9 @@ analyzeBtn.addEventListener("click", async () => {
     const actual = counts.map(c => c / total);
     const expected = benfordExpected();
     const deviation = actual.reduce((sum, a, i) => sum + Math.abs(a - expected[i]), 0);
+    const mad = deviation / 9;
+    const chiSquare = total * actual.reduce((sum, a, i) => sum + ((a - expected[i]) ** 2) / expected[i], 0);
+    const decades = magnitudes.length ? Math.log10(Math.max(...magnitudes)) - Math.log10(Math.min(...magnitudes)) : 0;
 
     const c = ensureChart();
     if (c) {
@@ -118,10 +151,20 @@ analyzeBtn.addEventListener("click", async () => {
       chartEl.textContent = "图表依赖未加载（ECharts），已跳过图表渲染。";
     }
 
-    deviationEl.textContent = `偏离度 (L1): ${deviation.toFixed(3)}`;
-    if (deviation > 0.25) riskEl.textContent = "提示: 偏离较高，建议重点复核。";
-    else if (deviation > 0.15) riskEl.textContent = "提示: 中等偏离，建议抽样复核。";
-    else riskEl.textContent = "提示: 偏离较低，但仍需结合业务背景判断。";
+    deviationEl.textContent = `Nigrini MAD：${mad.toFixed(4)}。卡方（自由度 8）：${chiSquare.toFixed(2)}，p=0.05 的临界值是 15.51。`;
+    if (total < 100) {
+      riskEl.textContent = `样本量不足（n=${total}，少于 100），本福特检验不适用，这里不给风险等级。`;
+    } else if (decades < 2) {
+      riskEl.textContent = `数值只跨了 ${decades.toFixed(1)} 个数量级。这个检验通常要求跨过 2 个以上数量级，所以下面不把偏离说成异常。`;
+    } else if (mad <= 0.006) {
+      riskEl.textContent = "MAD ≤ 0.006：Nigrini 称为接近符合。这仍只是分布线索，不是造假结论。";
+    } else if (mad <= 0.012) {
+      riskEl.textContent = "MAD 在 0.006 到 0.012：Nigrini 称为可接受。需要结合业务口径，不能单独定性。";
+    } else if (mad <= 0.015) {
+      riskEl.textContent = "MAD 在 0.012 到 0.015：Nigrini 称为勉强可接受，建议抽样复核原始记录。";
+    } else {
+      riskEl.textContent = "MAD > 0.015：Nigrini 称为不符合。这是复核信号，不是造假证明。";
+    }
 
     detailsEl.innerHTML = "";
     actual.forEach((a, i) => {
@@ -129,7 +172,7 @@ analyzeBtn.addEventListener("click", async () => {
       li.textContent = `数字 ${i + 1}: 实际 ${(a * 100).toFixed(2)}%, 理论 ${(expected[i] * 100).toFixed(2)}%`;
       detailsEl.appendChild(li);
     });
-    setStatus(`分析完成，共使用 ${total} 个数值`);
+    setStatus(`分析完成，使用 ${total} 个数值${skipped ? `，跳过 ${skipped} 个无法解析的单元格` : ""}。`);
   } catch (err) {
     setStatus(`分析失败: ${err.message}`);
   }
@@ -167,7 +210,7 @@ if (demoBtn) {
     dt.items.add(file);
     fileInput.files = dt.files;
 
-    setStatus('已加载示范数据（中国城市人口），点击"开始分析"查看结果');
+    setStatus("已载入 50 条城市人口，只供演示。不足 100 条，分析后应看到“样本量不足”，而不是风险等级。");
   });
 }
 
