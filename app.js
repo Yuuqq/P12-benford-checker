@@ -139,7 +139,7 @@ analyzeBtn.addEventListener("click", async () => {
       c.setOption({
         title: { text: `列 "${col}" Benford 对比` },
         tooltip: { trigger: "axis" },
-        legend: { data: ["实际", "理论"] },
+        legend: { data: ["实际", "理论"], top: 28 },
         xAxis: { type: "category", data: ["1", "2", "3", "4", "5", "6", "7", "8", "9"] },
         yAxis: { type: "value", axisLabel: { formatter: value => `${(value * 100).toFixed(0)}%` } },
         series: [
