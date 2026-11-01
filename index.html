@@ -3,13 +3,14 @@
 
 <head>
   <meta charset="utf-8" />
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>" />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f5f6ff">
+  <meta name="theme-color" content="#F0E6CF" />
   <meta name="color-scheme" content="light dark">
   <title>P12 本福特定律前端检测仪</title>
   <link rel="stylesheet" href="../shared/design-tokens.css" />
+  <link rel="stylesheet" href="../shared/modern-styles.css" />
+  <link rel="stylesheet" href="../shared/tool-chrome.css" />
   <link rel="stylesheet" href="./styles.css" />
   <meta name="description" content="本福特定律前端检测仪。P12 本福特定律前端检测仪" />
   <meta property="og:title" content="P12 本福特定律检测仪" />
@@ -19,10 +20,10 @@
   <link rel="manifest" href="./manifest.json" />
 <style media="print">
 .gnav,.pedagogy-panel,.explore-section,[class*="dark-toggle"],button[aria-label]{display:none!important}
-body{background:#fff!important;color:#000!important;font-size:11pt}
+body{background:var(--print-paper)!important;color:var(--print-ink)!important;font-size:11pt;transition:none!important}
 .app,main,.container{box-shadow:none!important;border:none!important;padding:0!important}
-a{color:#000!important;text-decoration:underline}
-a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
+a{color:var(--print-ink)!important;text-decoration:underline}
+a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:color-mix(in srgb,var(--print-ink) 70%,var(--print-paper))}
 @page{margin:2cm}
 </style>
 </head>
@@ -30,23 +31,30 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
 <body>
   <a href="#main" class="skip-link">跳到主内容 / Skip to main content</a>
   <main id="main" class="app">
+    <header class="tool-chrome" data-tool-id="P12">
+      <a class="tool-chrome__mark" href="../P00-dashboard/">新闻实验工具</a>
+      <span class="tool-chrome__id">P12</span>
+    </header>
+
     <header class="hero">
       <h1>本福特定律前端检测仪</h1>
       <p>本福特定律(Benford's Law)指出，在自然产生的数据集中，首位数字为 1 的概率约为 30.1%，而非均匀分布的 11.1%。这被广泛用于财务审计与数据打假检测。</p>
-      <p class="note">⚠️ 偏离是异常信号，不等于造假结论。没有 CSV？点击下方“加载示范数据”体验。</p>
+      <p class="note">偏离是异常信号，不等于造假结论。没有 CSV？点击下方“加载示范数据”体验。</p>
     </header>
 
-    <section class="card"><details class="teach-card" open><summary>🎓 本福特定律与财务调查</summary><p>本福特定律是一个统计学现象：自然数据中首位数字为 1 的概率约 30%，而不是 11%。在调查报道中，它常用于检测财务造假、选举蹊弊和统计篇改：如果数据严重偏离本福特分布，可能被人为篡改过。</p></details></section>
+    <details class="tool-teach">
+      <summary>如何使用</summary>
+      <p>本福特定律是一个统计学现象：自然数据中首位数字为 1 的概率约 30%，而不是 11%。在调查报道中，它常用于检测财务造假、选举蹊弊和统计篇改：如果数据严重偏离本福特分布，可能被人为篡改过。</p>
+    </details>
 
     <section class="card controls">
-      <input id="fileInput" type="file" accept=".csv,text/csv" aria-label="选择文件" />
-      <div style="display:flex;gap:12px;margin-top:8px">
-        <button id="analyzeBtn" type="button">📊 开始分析</button>
-        <button id="demoBtn" type="button"
-          style="background:#f59e0b;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer">📋
-          加载示范数据</button>
+      <label for="fileInput">选择 CSV</label>
+      <input id="fileInput" type="file" accept=".csv,text/csv" />
+      <div class="actions">
+        <button id="analyzeBtn" type="button">开始分析</button>
+        <button id="demoBtn" class="btn-secondary" type="button">加载示范数据</button>
       </div>
-      <p id="status" aria-live="polite">状态: 等待文件</p>
+      <p id="status" role="status" aria-live="polite">状态: 等待文件</p>
     </section>
 
     <section class="grid">
@@ -61,24 +69,17 @@ a[href]::after{content:" (" attr(href) ")";font-size:9pt;color:#666}
         <ul id="details"></ul>
       </article>
     </section>
+
+    <footer class="tool-footer">
+      数据边界以附录 A 为准：能在本机完成的计算不主动外发；示例数据仅供课堂；本工具输出不得单独当作结论。
+      <a href="../P00-dashboard/">返回工具箱</a>
+    </footer>
   </main>
 
   <script src="../shared/vendor/papaparse.min.js"></script>
   <script src="../shared/vendor/echarts.min.js"></script>
   <script src="./pm-metrics.js" defer></script>
   <script src="./app.js" defer></script>
-
-  <!-- Privacy Notice -->
-  <div style="text-align:center;padding:12px 16px;font-size:12px;color:#888;border-top:1px solid #eee;margin-top:24px;">
-    🔒 隐私提示：本工具所有数据处理均在您的浏览器本地完成，不会上传任何数据至服务器。
-  </div>
-
-  <!-- Cross-Project Navigation -->
-  <nav
-    style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-size:13px;border-top:1px solid #e5e5e5;margin-top:16px;color:#666;">
-    <a href="https://yuuqq.github.io/journalism-toolbox/" style="text-decoration:none;">📋 工具箱导航</a>
-    <span style="opacity:.4">P12</span>
-  </nav>
   <script src="../shared/releases/v2.6/loader.js" data-modules="dark,cmd,toast,onboarding,pedagogy-p1,pedagogy-p2,nav,kbd"></script>
   <script>if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}</script>
 

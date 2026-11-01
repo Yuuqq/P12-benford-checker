@@ -7,8 +7,21 @@ const detailsEl = document.getElementById("details");
 const chartEl = document.getElementById("chart");
 let chart = null;
 
+window.addEventListener("resize", () => {
+  if (chart) chart.resize();
+});
+
 function setStatus(text) {
   statusEl.textContent = `状态: ${text}`;
+}
+
+function cssToken(name, fallback) {
+  try {
+    const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return value || fallback;
+  } catch (_e) {
+    return fallback;
+  }
 }
 
 function ensurePapa(featureName) {
@@ -103,15 +116,30 @@ analyzeBtn.addEventListener("click", async () => {
 
     const c = ensureChart();
     if (c) {
+      const ink = cssToken("--ink", "#3A2E20");
+      const cinnabar = cssToken("--cinnabar", "#A2402F");
+      const gold = cssToken("--gold", "#8C6A2F");
+      const line = cssToken("--line", "#D3C4A0");
       c.setOption({
-        title: { text: `列 "${col}" Benford 对比` },
+        backgroundColor: "transparent",
+        title: { text: `列 "${col}" Benford 对比`, left: 0, top: 0, textStyle: { color: ink, fontSize: 14, fontWeight: 600 } },
         tooltip: { trigger: "axis" },
-        legend: { data: ["实际", "理论"] },
-        xAxis: { type: "category", data: ["1", "2", "3", "4", "5", "6", "7", "8", "9"] },
-        yAxis: { type: "value", axisLabel: { formatter: value => `${(value * 100).toFixed(0)}%` } },
+        legend: { data: ["实际", "理论"], top: 28, left: 0, textStyle: { color: ink } },
+        grid: { top: 72, right: 12, bottom: 8, left: 8, containLabel: true },
+        xAxis: {
+          type: "category",
+          data: ["1", "2", "3", "4", "5", "6", "7", "8", "9"],
+          axisLabel: { color: ink },
+          axisLine: { lineStyle: { color: line } }
+        },
+        yAxis: {
+          type: "value",
+          axisLabel: { color: ink, formatter: value => `${(value * 100).toFixed(0)}%` },
+          splitLine: { lineStyle: { color: line } }
+        },
         series: [
-          { name: "实际", type: "bar", data: actual, itemStyle: { color: "#4f78d7" } },
-          { name: "理论", type: "line", data: expected, itemStyle: { color: "#d46424" } }
+          { name: "实际", type: "bar", data: actual, itemStyle: { color: cinnabar } },
+          { name: "理论", type: "line", data: expected, itemStyle: { color: gold }, lineStyle: { color: gold } }
         ]
       });
     } else {
