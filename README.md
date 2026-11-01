@@ -17,7 +17,7 @@
 - 🔍 `Ctrl+K` 跨工具搜索跳转
 - 📱 PWA 离线支持（可安装到桌面/手机）
 - ♿ 完整无障碍标签（aria-label）
-- 🔒 所有数据仅在浏览器本地处理
+- 所有数据仅在浏览器本地处理
 
 ## 🛠️ 技术栈
 
@@ -33,7 +33,7 @@
 - `toast.js` — 🔔 Toast 通知系统
 - `onboarding.js` — 🎯 首次访问引导
 - `sw.js` — 📱 PWA Service Worker
-- `pm-metrics.js` — 📊 使用量遥测
+- `pm-metrics.js` — 使用量遥测
 
 ## 📄 许可
 
@@ -41,4 +41,4 @@
 
 ---
 
-*本项目是 [新闻素养工具箱](https://yuuqq.github.io/journalism-toolbox/) 的第 12 号工具。*
+*本项目是 [新闻实验工具](https://yuuqq.github.io/P00-dashboard/) 的第 12 号工具。*
